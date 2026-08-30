@@ -5,6 +5,8 @@
 #include <string.h>
 
 #include "fs.h"
+#include "cstow.h"
+#include "uncstow.h"
 
 struct cstow_context {
     const char *stow_dir;

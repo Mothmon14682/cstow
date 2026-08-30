@@ -10,7 +10,6 @@ enum {
 };
 
 int dirwalk(const char *dirpath, int (*fn)(const char *filepath, const struct stat *st, void*), void *ctx);
-int cstow_process_path(const char* source, const char* destination);
-int uncstow_process_path(const char* source, const char* destination);
+int is_our_link(const char *source, const char *destination);
 
 #endif

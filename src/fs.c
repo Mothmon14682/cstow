@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stddef.h>
-#include <errno.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -65,7 +64,7 @@ int dirwalk(const char *dirpath,
     return 0;
 }
 
-static int is_our_link(const char *source, const char *destination){
+int is_our_link(const char *source, const char *destination){
     char target[4096];
 
     ssize_t n = readlink(destination, target, sizeof(target) - 1);
@@ -74,77 +73,4 @@ static int is_our_link(const char *source, const char *destination){
     target[n] = '\0';
 
     return strcmp(target, source) == 0;
-}
-
-int cstow_process_path(const char* source, const char* destination){
-    if(source == NULL || destination == NULL) return PROCESS_ERROR;
-
-    struct stat st_dest;
-    struct stat st_source;
-
-    if(lstat(source, &st_source) == -1){
-        perror("lstat source");
-        return PROCESS_ERROR;
-    }
-
-    if (lstat(destination, &st_dest) == -1) {
-        if (errno != ENOENT) {
-            perror("lstat destination");
-            return PROCESS_ERROR;
-        }
-
-        if (symlink(source, destination) == -1) {
-            perror("symlink");
-            return PROCESS_ERROR;
-        }
-
-        return PROCESS_CREATED_LINK;
-    }
-
-    if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source.st_mode)) {
-        return PROCESS_SUCCESS;
-    }
-
-    if (S_ISLNK(st_dest.st_mode)) {
-        if (is_our_link(source, destination)) return PROCESS_SUCCESS;
-
-        fprintf(stderr, "conflict: %s exists but not from cstow\n", destination);
-        return PROCESS_ERROR;
-    }
-
-    fprintf(stderr, "conflict: %s exists but not from cstow\n", destination);
-    return PROCESS_ERROR;
-}
-
-int uncstow_process_path(const char* source, const char* destination){
-    if(source == NULL || destination == NULL) return PROCESS_ERROR;
-
-    struct stat st_dest;
-    if(lstat(destination, &st_dest) == -1){
-        if (errno == ENOENT) return PROCESS_SUCCESS;
-
-        perror("lstat destination");
-        return PROCESS_ERROR;
-    }
-
-    if(S_ISLNK(st_dest.st_mode)){
-        if (!is_our_link(source, destination)) {
-            fprintf(stderr, "conflict: %s is not a link to %s\n", destination, source);
-            return PROCESS_ERROR;
-        }
-
-        if (unlink(destination) == -1) {
-            perror("unlink");
-            return PROCESS_ERROR;
-        }
-
-        return PROCESS_SUCCESS;
-    }
-
-    if (S_ISDIR(st_dest.st_mode)) {
-        return PROCESS_SUCCESS;
-    }
-
-    fprintf(stderr, "conflict: %s\n", destination);
-    return PROCESS_ERROR;
 }
