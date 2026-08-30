@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
     }
 
     char *package = argv[optind];
-    (delete) ? uncstow(stow_dir, target_dir, package) : cstow(stow_dir, target_dir, package) ;
+    if(delete) return uncstow(stow_dir, target_dir, package);
 
-    return 0;
+    return cstow(stow_dir, target_dir, package);
 }
