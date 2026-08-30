@@ -15,16 +15,6 @@ struct cstow_context {
     const char *package_dir;
 };
 
-void remove_trailing_slash(char *path){
-    if(path == NULL) return;
-    size_t len = strlen(path);
-
-    while (len > 1 && path[len - 1] == '/') {
-        path[len - 1] = '\0';
-        len -= 1;
-    }
-}
-
 int cstow_callback(const char* filepath, const struct stat *st, void *arg){
     struct cstow_context *ctx = arg;
     if(ctx == NULL || st == NULL) return -1;

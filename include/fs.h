@@ -11,5 +11,6 @@ enum {
 
 int dirwalk(const char *dirpath, int (*fn)(const char *filepath, const struct stat *st, void*), void *ctx);
 int is_our_link(const char *source, const char *destination);
+void remove_trailing_slash(char *path);
 
 #endif

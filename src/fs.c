@@ -74,3 +74,13 @@ int is_our_link(const char *source, const char *destination){
 
     return strcmp(target, source) == 0;
 }
+
+void remove_trailing_slash(char *path){
+    if(path == NULL) return;
+    size_t len = strlen(path);
+
+    while (len > 1 && path[len - 1] == '/') {
+        path[len - 1] = '\0';
+        len -= 1;
+    }
+}
