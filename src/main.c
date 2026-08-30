@@ -8,13 +8,6 @@
 #include "cstow.h"
 #include "uncstow.h"
 
-struct cstow_context {
-    const char *stow_dir;
-    const char *target_dir;
-    const char *package;
-    const char *package_dir;
-};
-
 int cstow_callback(const char* filepath, const struct stat *st, void *arg){
     struct cstow_context *ctx = arg;
     if(ctx == NULL || st == NULL) return -1;
