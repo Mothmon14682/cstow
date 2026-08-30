@@ -8,32 +8,6 @@
 #include "cstow.h"
 #include "uncstow.h"
 
-int cstow_callback(const char* filepath, const struct stat *st, void *arg){
-    struct cstow_context *ctx = arg;
-    if(ctx == NULL || st == NULL) return -1;
-
-    const char *relative = filepath + strlen(ctx->package_dir);
-    if (*relative == '/')
-        relative++;
-
-    size_t destination_size = strlen(ctx->target_dir) + strlen(relative) + 2;
-    char *destination = malloc(destination_size);
-    if (destination == NULL) {
-        perror("malloc");
-        return -1;
-    }
-    snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
-
-    int process_status = cstow_process_path(filepath, destination);
-    free(destination);
-    switch (process_status) {
-        case PROCESS_ERROR:  return -1;
-        case PROCESS_CREATED_LINK: return DIR_SKIPCHD; 
-    }
-
-    return 0;
-}
-
 int uncstow_callback(const char *filepath, const struct stat *st, void *arg){
     struct cstow_context *ctx = arg;
     if(ctx == NULL || st == NULL) return -1;
@@ -65,6 +39,7 @@ int main(){
         .package_dir = "/home/tuan/Code/cstow/test"
     };
 
+    // cstow(ctx.stow_dir, ctx.target_dir, ctx.package);
     dirwalk(ctx.package_dir, uncstow_callback, &ctx);
     return 0;
 }
