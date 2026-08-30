@@ -7,6 +7,7 @@ CPPFLAGS = $(addprefix -I,$(INCLUDE_DIR))
 CFLAGS = -Wall -Wextra -fsanitize=address 
 LDFLAGS = -fsanitize=address
 DEPFLAGS = -MMD -MP -MF $(@:.o=.d)
+ARGS ?=
 
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
@@ -32,7 +33,7 @@ clean:
 	@rm -rf $(BUILD_DIR)
 
 run: $(TARGET)
-	@./$(TARGET)
+	@./$(TARGET) $(ARGS)
 
 -include $(OBJ:.o=.d)
 
