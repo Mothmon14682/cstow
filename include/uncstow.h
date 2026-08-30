@@ -1,6 +1,6 @@
 #ifndef __CSTOW_UNCSTOW_H
 #define __CSTOW_UNCSTOW_H
 
-int uncstow_process_path(const char* source, const char* destination);
+int uncstow(const char* stowdir, const char* target_dir, const char* package);
 
 #endif
