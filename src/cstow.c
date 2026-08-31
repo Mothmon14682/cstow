@@ -66,16 +66,24 @@ static int cstow_callback(const char* filepath, const struct stat *st, void *arg
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
     int process_status = cstow_process_path(filepath, destination);
-    free(destination);
     switch (process_status) {
-        case PROCESS_ERROR:  return -1;
-        case PROCESS_CREATED_LINK: return DIR_SKIPCHD; 
+        case PROCESS_ERROR:  
+            free(destination);
+            return -1;
+        break;
+        case PROCESS_CREATED_LINK: 
+            if(ctx->options.verbose) printf("Created a link: %s -> %s\n", destination, ctx->package_dir);
+            
+            free(destination);
+            return DIR_SKIPCHD;
+        break;
     }
 
+    free(destination);
     return 0;
 }
 
-int cstow(const char* stowdir, const char* target_dir, const char* package){
+int cstow(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options){
     char package_dir[PATH_MAX];
 
     int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", stowdir, package);
@@ -85,7 +93,8 @@ int cstow(const char* stowdir, const char* target_dir, const char* package){
         .stow_dir = stowdir,
         .target_dir = target_dir,
         .package = package,
-        .package_dir = package_dir
+        .package_dir = package_dir,
+        .options = options
     };
 
     return dirwalk(package_dir, cstow_callback, &ctx);

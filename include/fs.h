@@ -3,10 +3,17 @@
 
 #define DIR_SKIPCHD 1
 
+#include <sys/stat.h>
+
 enum {
     PROCESS_ERROR = -1,
     PROCESS_SUCCESS = 0,
     PROCESS_CREATED_LINK = 1
+};
+
+struct cstow_cli_options{
+    int verbose;
+    int dry_run;
 };
 
 struct cstow_context {
@@ -14,7 +21,10 @@ struct cstow_context {
     const char *target_dir;
     const char *package;
     const char *package_dir;
+
+    struct cstow_cli_options options;
 };
+
 
 int dirwalk(const char *dirpath, int (*fn)(const char *filepath, const struct stat *st, void*), void *ctx);
 int is_our_link(const char *source, const char *destination);

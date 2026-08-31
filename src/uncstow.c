@@ -60,12 +60,14 @@ static int uncstow_callback(const char *filepath, const struct stat *st, void *a
     
     int process_status = uncstow_process_path(filepath, destination);
     if(process_status == PROCESS_ERROR) return -1;
+    
+    if(ctx->options.verbose) printf("Unlinked: %s\n", destination);
 
     free(destination);
     return 0;
 }
 
-int uncstow(const char* stowdir, const char* target_dir, const char* package){
+int uncstow(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options){
     char package_dir[PATH_MAX];
 
     int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", stowdir, package);
@@ -75,7 +77,8 @@ int uncstow(const char* stowdir, const char* target_dir, const char* package){
         .stow_dir = stowdir,
         .target_dir = target_dir,
         .package = package,
-        .package_dir = package_dir
+        .package_dir = package_dir,
+        .options = options
     };
 
     return dirwalk(package_dir, uncstow_callback, &ctx);
