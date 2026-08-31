@@ -9,6 +9,7 @@ enum {
     PROCESS_ERROR = -1,
     PROCESS_SUCCESS = 0,
     PROCESS_CREATED_LINK = 1,
+    PROCESS_UNLINK = 3,
     PROCESS_UNLINK_DIR = 2
 };
 

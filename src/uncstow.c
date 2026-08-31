@@ -40,7 +40,7 @@ static int uncstow_process_path(const char* source, const char* destination){
 
         if(S_ISDIR(st_source.st_mode)) return PROCESS_UNLINK_DIR;
 
-        return PROCESS_SUCCESS;
+        return PROCESS_UNLINK;
     }
 
     if (S_ISDIR(st_dest.st_mode)) {
@@ -79,9 +79,13 @@ static int uncstow_callback(const char *filepath, const struct stat *st, void *a
             free(destination);
             return DIR_SKIPCHD;
         break;
-    }
+        case PROCESS_UNLINK:
+            if(ctx->options.verbose) printf("Unlinked: %s\n", destination);
 
-    if(ctx->options.verbose) printf("Unlinked: %s\n", destination);
+            free(destination);
+            return 0;
+        break;
+    }
 
     free(destination);
     return 0;
