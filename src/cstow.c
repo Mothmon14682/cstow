@@ -84,14 +84,27 @@ static int cstow_callback(const char* filepath, const struct stat *st, void *arg
 }
 
 int cstow(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options){
+    char real_stowdir[PATH_MAX];
+    char real_target_dir[PATH_MAX];
+
+    if(realpath(stowdir, real_stowdir) == NULL){
+        perror("realpath");
+        return -1;
+    }
+
+    if(realpath(target_dir, real_target_dir) == NULL){
+        perror("realpath");
+        return -1;
+    }
+
     char package_dir[PATH_MAX];
 
-    int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", stowdir, package);
+    int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", real_stowdir, package);
     if(needed > PATH_MAX) return -1;
 
     struct cstow_context ctx = {
         .stow_dir = stowdir,
-        .target_dir = target_dir,
+        .target_dir = real_target_dir,
         .package = package,
         .package_dir = package_dir,
         .options = options
