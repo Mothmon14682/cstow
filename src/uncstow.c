@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #include "fs.h"
-#include "cstow.h"
+#include "uncstow.h"
 
 static int uncstow_process_path(const char* source, const char* destination){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
