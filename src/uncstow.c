@@ -13,6 +13,13 @@ static int uncstow_process_path(const char* source, const char* destination){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
+    struct stat st_source;
+    
+    if(lstat(source, &st_source) == -1){
+        perror("lstat destination");
+        return PROCESS_ERROR;
+    }
+
     if(lstat(destination, &st_dest) == -1){
         if (errno == ENOENT) return PROCESS_SUCCESS;
 
@@ -30,6 +37,8 @@ static int uncstow_process_path(const char* source, const char* destination){
             perror("unlink");
             return PROCESS_ERROR;
         }
+
+        if(S_ISDIR(st_source.st_mode)) return PROCESS_UNLINK_DIR;
 
         return PROCESS_SUCCESS;
     }
@@ -59,8 +68,19 @@ static int uncstow_callback(const char *filepath, const struct stat *st, void *a
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
     
     int process_status = uncstow_process_path(filepath, destination);
-    if(process_status == PROCESS_ERROR) return -1;
-    
+    switch (process_status) {
+        case PROCESS_ERROR:  
+            free(destination);
+            return -1;
+        break;
+        case PROCESS_UNLINK_DIR: 
+            if(ctx->options.verbose) printf("Unlinked: %s\n", destination);
+
+            free(destination);
+            return DIR_SKIPCHD;
+        break;
+    }
+
     if(ctx->options.verbose) printf("Unlinked: %s\n", destination);
 
     free(destination);
