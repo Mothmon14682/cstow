@@ -35,9 +35,11 @@ int main(int argc, char *argv[]){
     while((opt = getopt(argc, argv, ":s:d:Dv")) != -1){
         switch(opt){
             case 's':
+                remove_trailing_slash(optarg);
                 stow_dir = optarg;
             break;
             case 'd':
+                remove_trailing_slash(optarg);
                 target_dir = optarg;
             break;
             case 'D':
