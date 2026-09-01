@@ -7,6 +7,16 @@
 #include "cstow.h"
 #include "uncstow.h"
 
+void print_help(){
+    printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
+           "A simple to use symlink farm manager\n"
+           "\nOPTIONS:\n"
+           "  -s, --stow-dir\n\tSpecify the source directory which contain all the packages\n"
+           "  -d, --target-dir\n\tSpecify the destination directory which the linking will happen at\n"
+           "  -D, --uncstow\n\tRemove the link created in the target directory\n"
+           "  -v, --verbose\n\tShow more output for the operation\n");
+}
+
 int main(int argc, char *argv[]){
     char *stow_dir, *target_dir;
     int opt;
@@ -32,8 +42,12 @@ int main(int argc, char *argv[]){
 
     target_dir = user->pw_dir;
 
-    while((opt = getopt(argc, argv, ":s:d:Dv")) != -1){
+    while((opt = getopt(argc, argv, ":hs:d:Dv")) != -1){
         switch(opt){
+            case 'h':
+                print_help();
+                return 0;
+            break;
             case 's':
                 remove_trailing_slash(optarg);
                 stow_dir = optarg;
