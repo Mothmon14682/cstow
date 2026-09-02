@@ -9,7 +9,7 @@
 #include "fs.h"
 #include "uncstow.h"
 
-static int uncstow_process_path(const char* source, const char* destination){
+static int uncstow_process_path(const char* source, const char* destination, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
@@ -40,12 +40,18 @@ static int uncstow_process_path(const char* source, const char* destination){
 
         fprintf(stdout, "Unlinked: %s\n", destination);
 
-        if(S_ISDIR(st_source.st_mode)) return PROCESS_SKIPCHD;
+        if(S_ISDIR(st_source.st_mode)){
+            if(verbose) fprintf(stdout, "uncstow: Skipping the children of %s directory\n", source);
+
+            return PROCESS_SKIPCHD;
+        }
 
         return PROCESS_SUCCESS;
     }
 
     if (S_ISDIR(st_dest.st_mode)) {
+        if(verbose) fprintf(stdout, "uncstow: %s is a directory so not unlink or remove it\n", destination);
+
         return PROCESS_SUCCESS;
     }
 
@@ -69,7 +75,7 @@ static int uncstow_callback(const char *filepath, const struct stat *st, void *a
     }
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
     
-    int process_status = uncstow_process_path(filepath, destination);
+    int process_status = uncstow_process_path(filepath, destination, ctx->options.verbose);
     switch (process_status) {
         case PROCESS_ERROR:  
             free(destination);
