@@ -10,7 +10,7 @@
 #include "fs.h"
 #include "link_manager.h"
 
-static int cstow_process_path(const char* source, const char* destination, struct stat st_source, int verbose){
+static int cstow_process_path(const char* source, const char* destination, const struct stat *st_source, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
@@ -27,7 +27,7 @@ static int cstow_process_path(const char* source, const char* destination, struc
         }
         fprintf(stdout, "Created a link: %s -> %s\n", destination, source);
 
-        if(S_ISDIR(st_source.st_mode)) { 
+        if(S_ISDIR(st_source->st_mode)) { 
             if(verbose) fprintf(stdout, "cstow: Skipped the children of %s directory\n", source);
 
             return PROCESS_SKIPCHD; 
@@ -36,7 +36,7 @@ static int cstow_process_path(const char* source, const char* destination, struc
         return PROCESS_SUCCESS;
     }
 
-    if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source.st_mode)) {
+    if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source->st_mode)) {
         if(verbose) fprintf(stdout, "cstow: The directory in %s is user created at %s so not create link\n", source, destination);
 
         return PROCESS_SUCCESS;
@@ -44,7 +44,7 @@ static int cstow_process_path(const char* source, const char* destination, struc
 
     if (S_ISLNK(st_dest.st_mode)) {
         if (is_our_link(source, destination)) {
-            if(S_ISDIR(st_source.st_mode)){
+            if(S_ISDIR(st_source->st_mode)){
                 if(verbose) fprintf(stdout, "cstow: %s is a link to directory at %s so skip creat link for the children of the directory\n", destination, source);
 
                 return PROCESS_SKIPCHD;
@@ -63,7 +63,7 @@ static int cstow_process_path(const char* source, const char* destination, struc
     return PROCESS_ERROR;
 }
 
-static int uncstow_process_path(const char* source, const char* destination, struct stat st_source, int verbose){
+static int uncstow_process_path(const char* source, const char* destination, const struct stat *st_source, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
@@ -88,7 +88,7 @@ static int uncstow_process_path(const char* source, const char* destination, str
 
         fprintf(stdout, "Unlinked: %s\n", destination);
 
-        if(S_ISDIR(st_source.st_mode)){
+        if(S_ISDIR(st_source->st_mode)){
             if(verbose) fprintf(stdout, "uncstow: Skipping the children of %s directory\n", source);
 
             return PROCESS_SKIPCHD;
@@ -124,14 +124,14 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
     if(ctx->op == CSTOW_OP){
-        int process_status = cstow_process_path(filepath, destination, *st, ctx->options.verbose);
+        int process_status = cstow_process_path(filepath, destination, st, ctx->options.verbose);
         free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
         }
     }else if(ctx->op == UNCSTOW_OP){
-        int process_status = uncstow_process_path(filepath, destination, *st, ctx->options.verbose);
+        int process_status = uncstow_process_path(filepath, destination, st, ctx->options.verbose);
         free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
