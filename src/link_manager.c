@@ -10,16 +10,10 @@
 #include "fs.h"
 #include "link_manager.h"
 
-static int cstow_process_path(const char* source, const char* destination, int verbose){
+static int cstow_process_path(const char* source, const char* destination, struct stat st_source, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
-    struct stat st_source;
-
-    if(lstat(source, &st_source) == -1){
-        perror("lstat source");
-        return PROCESS_ERROR;
-    }
 
     if (lstat(destination, &st_dest) == -1) {
         if (errno != ENOENT) {
@@ -69,16 +63,10 @@ static int cstow_process_path(const char* source, const char* destination, int v
     return PROCESS_ERROR;
 }
 
-static int uncstow_process_path(const char* source, const char* destination, int verbose){
+static int uncstow_process_path(const char* source, const char* destination, struct stat st_source, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
-    struct stat st_source;
-    
-    if(lstat(source, &st_source) == -1){
-        perror("lstat destination");
-        return PROCESS_ERROR;
-    }
 
     if(lstat(destination, &st_dest) == -1){
         if (errno == ENOENT) return PROCESS_SUCCESS;
@@ -136,14 +124,14 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
     if(ctx->op == CSTOW_OP){
-        int process_status = cstow_process_path(filepath, destination, ctx->options.verbose);
+        int process_status = cstow_process_path(filepath, destination, *st, ctx->options.verbose);
         free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
         }
     }else if(ctx->op == UNCSTOW_OP){
-        int process_status = uncstow_process_path(filepath, destination, ctx->options.verbose);
+        int process_status = uncstow_process_path(filepath, destination, *st, ctx->options.verbose);
         free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
