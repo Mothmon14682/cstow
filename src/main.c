@@ -15,6 +15,13 @@ struct option long_options[] = {
     {"verbose",    no_argument,       NULL, 'v'},
     {0, 0, 0, 0}
 };
+char *stow_dir = NULL, *target_dir = NULL;
+int opt;
+struct cstow_cli_options options = {
+    .dry_run = 0,
+    .verbose = 0
+};
+enum cstow_operation op = CSTOW_OP;
 
 void print_help(){
     printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
@@ -27,14 +34,6 @@ void print_help(){
 }
 
 int main(int argc, char *argv[]){
-    char *stow_dir, *target_dir;
-    int opt;
-    int delete = 0;
-    struct cstow_cli_options options = {
-        .dry_run = 0,
-        .verbose = 0
-    };
-
     char cwd[PATH_MAX];
     if(getcwd(cwd, sizeof(cwd)) == NULL){
         perror("getcwd");
@@ -66,7 +65,7 @@ int main(int argc, char *argv[]){
                 target_dir = optarg;
             break;
             case 'D':
-                delete = 1;
+                op = UNCSTOW_OP;
             break;
             case 'v':
                 options.verbose = 1;
@@ -88,7 +87,5 @@ int main(int argc, char *argv[]){
     }
 
     char *package = argv[optind];
-    if(delete) return link_manager_action(stow_dir, target_dir, package, options, UNCSTOW_OP);
-
-    return link_manager_action(stow_dir, target_dir, package, options, CSTOW_OP);
+    return link_manager_action(stow_dir, target_dir, package, options, op);
 }
