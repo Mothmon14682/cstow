@@ -115,24 +115,22 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
     if (*relative == '/')
         relative++;
 
-    size_t destination_size = strlen(ctx->target_dir) + strlen(relative) + 2;
-    char *destination = malloc(destination_size);
-    if (destination == NULL) {
-        perror("malloc");
+    char destination[PATH_MAX];
+
+    int needed = snprintf(destination, sizeof(destination), "%s/%s", ctx->target_dir, relative);
+    if(needed < 0 || needed >= PATH_MAX){
+        fprintf(stderr, "Path name too long\n");
         return -1;
     }
-    snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
     if(ctx->op == CSTOW_OP){
         int process_status = cstow_process_path(filepath, destination, st, ctx->options.verbose);
-        free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
         }
     }else if(ctx->op == UNCSTOW_OP){
         int process_status = uncstow_process_path(filepath, destination, st, ctx->options.verbose);
-        free(destination);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
