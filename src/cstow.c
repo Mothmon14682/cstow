@@ -30,8 +30,11 @@ static int cstow_process_path(const char* source, const char* destination){
             perror("symlink");
             return PROCESS_ERROR;
         }
+        fprintf(stdout, "Created a link: %s -> %s\n", destination, source);
 
-        return PROCESS_CREATED_LINK;
+        if(S_ISDIR(st_source.st_mode)) return PROCESS_SKIPCHD;
+
+        return PROCESS_SUCCESS;
     }
 
     if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source.st_mode)) {
@@ -71,9 +74,7 @@ static int cstow_callback(const char* filepath, const struct stat *st, void *arg
             free(destination);
             return -1;
         break;
-        case PROCESS_CREATED_LINK: 
-            if(ctx->options.verbose) printf("Created a link: %s -> %s\n", destination, ctx->package_dir);
-            
+        case PROCESS_SKIPCHD: 
             free(destination);
             return DIR_SKIPCHD;
         break;
