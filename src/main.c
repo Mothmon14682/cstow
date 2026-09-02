@@ -2,9 +2,19 @@
 #include <unistd.h>
 #include <limits.h>
 #include <pwd.h>
+#include <getopt.h>
 
 #include "fs.h"
 #include "link_manager.h"
+
+struct option long_options[] = {
+    {"help",       no_argument,       NULL, 'h'},
+    {"stow-dir",   required_argument, NULL, 's'},
+    {"target-dir", required_argument, NULL, 'd'},
+    {"uncstow",    no_argument,       NULL, 'D'},
+    {"verbose",    no_argument,       NULL, 'v'},
+    {0, 0, 0, 0}
+};
 
 void print_help(){
     printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
@@ -41,7 +51,7 @@ int main(int argc, char *argv[]){
 
     target_dir = user->pw_dir;
 
-    while((opt = getopt(argc, argv, ":hs:d:Dv")) != -1){
+    while((opt = getopt_long(argc, argv, ":hs:d:Dv", long_options, NULL)) != -1){
         switch(opt){
             case 'h':
                 print_help();
