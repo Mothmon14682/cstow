@@ -34,7 +34,7 @@ static int cstow_process_path(const char* source, const char* destination, int v
         fprintf(stdout, "Created a link: %s -> %s\n", destination, source);
 
         if(S_ISDIR(st_source.st_mode)) { 
-            if(verbose) fprintf(stdout, "Skipped the children of %s directory\n", source);
+            if(verbose) fprintf(stdout, "cstow: Skipped the children of %s directory\n", source);
 
             return PROCESS_SKIPCHD; 
         }
@@ -43,14 +43,14 @@ static int cstow_process_path(const char* source, const char* destination, int v
     }
 
     if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source.st_mode)) {
-        if(verbose) fprintf(stdout, "The directory in %s is user created at %s so not create link\n", source, destination);
+        if(verbose) fprintf(stdout, "cstow: The directory in %s is user created at %s so not create link\n", source, destination);
 
         return PROCESS_SUCCESS;
     }
 
     if (S_ISLNK(st_dest.st_mode)) {
         if (is_our_link(source, destination)) {
-            if(verbose) fprintf(stdout, "A link existed at %s so not create link\n", destination);
+            if(verbose) fprintf(stdout, "cstow: A link existed at %s so not create link\n", destination);
 
             return PROCESS_SUCCESS;
         }
