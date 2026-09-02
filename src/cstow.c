@@ -5,11 +5,12 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <limits.h>
+#include <libgen.h>
 
 #include "fs.h"
 #include "cstow.h"
 
-static int cstow_process_path(const char* source, const char* destination){
+static int cstow_process_path(const char* source, const char* destination, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
@@ -32,17 +33,27 @@ static int cstow_process_path(const char* source, const char* destination){
         }
         fprintf(stdout, "Created a link: %s -> %s\n", destination, source);
 
-        if(S_ISDIR(st_source.st_mode)) return PROCESS_SKIPCHD;
+        if(S_ISDIR(st_source.st_mode)) { 
+            if(verbose) fprintf(stdout, "Skipped the children of %s directory\n", source);
+
+            return PROCESS_SKIPCHD; 
+        }
 
         return PROCESS_SUCCESS;
     }
 
     if (S_ISDIR(st_dest.st_mode) && S_ISDIR(st_source.st_mode)) {
+        if(verbose) fprintf(stdout, "The directory in %s is user created at %s so not create link\n", source, destination);
+
         return PROCESS_SUCCESS;
     }
 
     if (S_ISLNK(st_dest.st_mode)) {
-        if (is_our_link(source, destination)) return PROCESS_SUCCESS;
+        if (is_our_link(source, destination)) {
+            if(verbose) fprintf(stdout, "A link existed at %s so not create link\n", destination);
+
+            return PROCESS_SUCCESS;
+        }
 
         fprintf(stderr, "conflict: %s exists but not from cstow\n", destination);
         return PROCESS_ERROR;
@@ -68,7 +79,7 @@ static int cstow_callback(const char* filepath, const struct stat *st, void *arg
     }
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
-    int process_status = cstow_process_path(filepath, destination);
+    int process_status = cstow_process_path(filepath, destination, ctx->options.verbose);
     switch (process_status) {
         case PROCESS_ERROR:  
             free(destination);
