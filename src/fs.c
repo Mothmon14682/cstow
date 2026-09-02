@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <string.h>
+#include <limits.h>
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -65,7 +66,7 @@ int dirwalk(const char *dirpath,
 }
 
 int is_our_link(const char *source, const char *destination){
-    char target[4096];
+    char target[PATH_MAX];
 
     ssize_t n = readlink(destination, target, sizeof(target) - 1);
     if(n == -1) return 0;

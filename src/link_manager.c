@@ -158,7 +158,7 @@ int link_manager_action(const char* stowdir, const char* target_dir, const char*
     char package_dir[PATH_MAX];
 
     int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", real_stowdir, package);
-    if(needed > PATH_MAX) return -1;
+    if(needed < 0 || needed >= PATH_MAX) return -1;
 
     struct cstow_context ctx = {
         .stow_dir = stowdir,
