@@ -50,6 +50,12 @@ static int cstow_process_path(const char* source, const char* destination, int v
 
     if (S_ISLNK(st_dest.st_mode)) {
         if (is_our_link(source, destination)) {
+            if(S_ISDIR(st_source.st_mode)){
+                if(verbose) fprintf(stdout, "cstow: %s is a link to directory at %s so skip creat link for the children of the directory\n", destination, source);
+
+                return PROCESS_SKIPCHD;
+            }
+
             if(verbose) fprintf(stdout, "cstow: A link existed at %s so not create link\n", destination);
 
             return PROCESS_SUCCESS;
