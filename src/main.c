@@ -4,8 +4,7 @@
 #include <pwd.h>
 
 #include "fs.h"
-#include "cstow.h"
-#include "uncstow.h"
+#include "link_manager.h"
 
 void print_help(){
     printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
@@ -79,7 +78,7 @@ int main(int argc, char *argv[]){
     }
 
     char *package = argv[optind];
-    if(delete) return uncstow(stow_dir, target_dir, package, options);
+    if(delete) return link_manager_action(stow_dir, target_dir, package, options, UNCSTOW_OP);
 
-    return cstow(stow_dir, target_dir, package, options);
+    return link_manager_action(stow_dir, target_dir, package, options, CSTOW_OP);
 }

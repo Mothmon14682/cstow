@@ -8,7 +8,7 @@
 #include <libgen.h>
 
 #include "fs.h"
-#include "cstow.h"
+#include "link_manager.h"
 
 static int cstow_process_path(const char* source, const char* destination, int verbose){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
@@ -69,7 +69,57 @@ static int cstow_process_path(const char* source, const char* destination, int v
     return PROCESS_ERROR;
 }
 
-static int cstow_callback(const char* filepath, const struct stat *st, void *arg){
+static int uncstow_process_path(const char* source, const char* destination, int verbose){
+    if(source == NULL || destination == NULL) return PROCESS_ERROR;
+
+    struct stat st_dest;
+    struct stat st_source;
+    
+    if(lstat(source, &st_source) == -1){
+        perror("lstat destination");
+        return PROCESS_ERROR;
+    }
+
+    if(lstat(destination, &st_dest) == -1){
+        if (errno == ENOENT) return PROCESS_SUCCESS;
+
+        perror("lstat destination");
+        return PROCESS_ERROR;
+    }
+
+    if(S_ISLNK(st_dest.st_mode)){
+        if (!is_our_link(source, destination)) {
+            fprintf(stderr, "conflict: %s is not a link to %s\n", destination, source);
+            return PROCESS_ERROR;
+        }
+
+        if (unlink(destination) == -1) {
+            perror("unlink");
+            return PROCESS_ERROR;
+        }
+
+        fprintf(stdout, "Unlinked: %s\n", destination);
+
+        if(S_ISDIR(st_source.st_mode)){
+            if(verbose) fprintf(stdout, "uncstow: Skipping the children of %s directory\n", source);
+
+            return PROCESS_SKIPCHD;
+        }
+
+        return PROCESS_SUCCESS;
+    }
+
+    if (S_ISDIR(st_dest.st_mode)) {
+        if(verbose) fprintf(stdout, "uncstow: %s is a directory so not unlink or remove it\n", destination);
+
+        return PROCESS_SUCCESS;
+    }
+
+    fprintf(stderr, "conflict: %s\n", destination);
+    return PROCESS_ERROR;
+}
+
+static int link_manager_callback(const char* filepath, const struct stat *st, void *arg){
     struct cstow_context *ctx = arg;
     if(ctx == NULL || st == NULL) return -1;
 
@@ -85,23 +135,25 @@ static int cstow_callback(const char* filepath, const struct stat *st, void *arg
     }
     snprintf(destination, destination_size, "%s/%s", ctx->target_dir, relative);
 
-    int process_status = cstow_process_path(filepath, destination, ctx->options.verbose);
-    switch (process_status) {
-        case PROCESS_ERROR:  
-            free(destination);
-            return -1;
-        break;
-        case PROCESS_SKIPCHD: 
-            free(destination);
-            return DIR_SKIPCHD;
-        break;
+    if(ctx->op == CSTOW_OP){
+        int process_status = cstow_process_path(filepath, destination, ctx->options.verbose);
+        free(destination);
+        switch (process_status) {
+            case PROCESS_ERROR:  return -1;
+            case PROCESS_SKIPCHD: return DIR_SKIPCHD;
+        }
+    }else if(ctx->op == UNCSTOW_OP){
+        int process_status = uncstow_process_path(filepath, destination, ctx->options.verbose);
+        free(destination);
+        switch (process_status) {
+            case PROCESS_ERROR:  return -1;
+            case PROCESS_SKIPCHD: return DIR_SKIPCHD;
+        }
     }
-
-    free(destination);
     return 0;
 }
 
-int cstow(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options){
+int link_manager_action(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options, enum cstow_operation op){
     char real_stowdir[PATH_MAX];
     char real_target_dir[PATH_MAX];
 
@@ -125,8 +177,9 @@ int cstow(const char* stowdir, const char* target_dir, const char* package, stru
         .target_dir = real_target_dir,
         .package = package,
         .package_dir = package_dir,
-        .options = options
+        .options = options,
+        .op = op
     };
 
-    return dirwalk(package_dir, cstow_callback, &ctx);
+    return dirwalk(package_dir, link_manager_callback, &ctx);
 }

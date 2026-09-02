@@ -16,6 +16,11 @@ struct cstow_cli_options{
     int dry_run;
 };
 
+enum cstow_operation{
+    CSTOW_OP,
+    UNCSTOW_OP
+};
+
 struct cstow_context {
     const char *stow_dir;
     const char *target_dir;
@@ -23,6 +28,7 @@ struct cstow_context {
     const char *package_dir;
 
     struct cstow_cli_options options;
+    enum cstow_operation op;
 };
 
 
