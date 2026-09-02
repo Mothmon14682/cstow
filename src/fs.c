@@ -26,6 +26,7 @@ int dirwalk(const char *dirpath,
         int needed = snprintf(child_path, sizeof(child_path), "%s/%s", dirpath, entry->d_name);
         if(needed < 0 || needed >= PATH_MAX){
             fprintf(stderr, "Path name too long\n");
+            closedir(dir);
             return -1;
         }
 
