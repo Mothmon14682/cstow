@@ -95,4 +95,8 @@ void cstow_planner_destroy(struct cstow_planner *planner){
     }
 
     free(planner->actions);
+
+    planner->capacity = 0;
+    planner->count = 0;
+    planner->actions = NULL;
 }
