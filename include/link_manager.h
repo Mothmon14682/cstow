@@ -3,6 +3,21 @@
 
 #include "fs.h"
 
+enum cstow_operation{
+    CSTOW_OP,
+    UNCSTOW_OP
+};
+
+struct cstow_context {
+    const char *stow_dir;
+    const char *target_dir;
+    const char *package;
+    const char *package_dir;
+
+    struct cstow_cli_options options;
+    enum cstow_operation op;
+};
+
 int link_manager_action(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options, enum cstow_operation op);
 
 #endif

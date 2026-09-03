@@ -16,22 +16,6 @@ struct cstow_cli_options{
     int dry_run;
 };
 
-enum cstow_operation{
-    CSTOW_OP,
-    UNCSTOW_OP
-};
-
-struct cstow_context {
-    const char *stow_dir;
-    const char *target_dir;
-    const char *package;
-    const char *package_dir;
-
-    struct cstow_cli_options options;
-    enum cstow_operation op;
-};
-
-
 int dirwalk(const char *dirpath, int (*fn)(const char *filepath, const struct stat *st, void*), void *ctx);
 int is_our_link(const char *source, const char *destination);
 void remove_trailing_slash(char *path);
