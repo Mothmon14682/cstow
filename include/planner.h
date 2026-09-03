@@ -22,7 +22,7 @@ struct cstow_planner{
     struct cstow_action *actions;
 };
 
-int cstow_planner_init(struct cstow_planner *planner);
+void cstow_planner_init(struct cstow_planner *planner);
 int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type, const char *src, const char *dest);
 void cstow_plan_destroy(struct cstow_planner *planner);
 
