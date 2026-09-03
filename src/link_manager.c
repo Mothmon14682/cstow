@@ -163,5 +163,18 @@ int link_manager_action(const char* stowdir, const char* target_dir, const char*
         .planner = &planner
     };
 
-    return dirwalk(package_dir, link_manager_callback, &ctx);
+    int result = dirwalk(package_dir, link_manager_callback, &ctx); 
+
+    if (result != 0) {
+        cstow_planner_destroy(&planner);
+        return result;
+    }
+
+    if (cstow_planner_execute(&planner) != 0) {
+        cstow_planner_destroy(&planner);
+        return -1;
+    }
+
+    cstow_planner_destroy(&planner);
+    return result;
 }

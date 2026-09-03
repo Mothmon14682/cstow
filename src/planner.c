@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "planner.h"
 
@@ -29,6 +30,15 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
         planner->actions = temp_actions;
     }
 
+    if(planner->actions == NULL){
+        planner->actions = malloc(planner->capacity * sizeof(struct cstow_action));
+
+        if(planner->actions == NULL){
+            perror("malloc");
+            return -1;
+        }
+    }
+
     struct cstow_action *action = &planner->actions[planner->count];
 
     action->type = type;
@@ -50,7 +60,36 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
     return 0;
 }
 
-void cstow_plan_destroy(struct cstow_planner *planner){
+int cstow_planner_execute(struct cstow_planner *planner){
+    if(planner == NULL) return -1;
+
+    for(size_t i = 0; i < planner->count; i++){
+        const struct cstow_action *action = &planner->actions[i];
+
+        switch (action->type) {
+            case CSTOW_ACTION_CREATE:
+                if(symlink(action->src, action->dest) == -1){
+                    perror("symlink");
+                    return -1;
+                }
+
+                printf("Created a link: %s -> %s\n", action->dest, action->src);
+            break;
+            case CSTOW_ACTION_REMOVE:
+                if (unlink(action->dest) == -1) {
+                    perror("unlink");
+                    return -1;
+                }
+
+                printf("Unlinked: %s\n", action->dest);
+            break;
+        }
+    }
+
+    return 0;
+}
+
+void cstow_planner_destroy(struct cstow_planner *planner){
     if(planner == NULL) return;
 
     for(size_t i = 0; i < planner->count; i++){
