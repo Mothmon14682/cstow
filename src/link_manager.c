@@ -8,6 +8,7 @@
 #include <libgen.h>
 
 #include "fs.h"
+#include "planner.h"
 #include "link_manager.h"
 
 static int cstow_process_path(const char* source, const char* destination, const struct stat *st_source, struct cstow_context *ctx){
@@ -22,11 +23,7 @@ static int cstow_process_path(const char* source, const char* destination, const
             return PROCESS_ERROR;
         }
 
-        if (symlink(source, destination) == -1) {
-            perror("symlink");
-            return PROCESS_ERROR;
-        }
-        fprintf(stdout, "Created a link: %s -> %s\n", destination, source);
+        if (cstow_planner_add(ctx->planner, CSTOW_ACTION_CREATE, source, destination) != 0) return PROCESS_ERROR;
 
         if(S_ISDIR(st_source->st_mode)) { 
             if(verbose) fprintf(stdout, "cstow: Skipped the children of %s directory\n", source);
@@ -83,12 +80,7 @@ static int uncstow_process_path(const char* source, const char* destination, con
             return PROCESS_ERROR;
         }
 
-        if (unlink(destination) == -1) {
-            perror("unlink");
-            return PROCESS_ERROR;
-        }
-
-        fprintf(stdout, "Unlinked: %s\n", destination);
+        if (cstow_planner_add(ctx->planner, CSTOW_ACTION_REMOVE, source, destination) != 0) return PROCESS_ERROR;
 
         if(S_ISDIR(st_source->st_mode)){
             if(verbose) fprintf(stdout, "uncstow: Skipping the children of %s directory\n", source);
@@ -132,7 +124,7 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
         }
     }else if(ctx->op == UNCSTOW_OP){
-        int process_status = uncstow_process_path(filepath, destination, st, ctx->options.verbose);
+        int process_status = uncstow_process_path(filepath, destination, st, ctx);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
@@ -160,11 +152,15 @@ int link_manager_action(const char* stowdir, const char* target_dir, const char*
     int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", real_stowdir, package);
     if(needed < 0 || needed >= PATH_MAX) return -1;
 
+    struct cstow_planner planner;
+    cstow_planner_init(&planner);
+
     struct cstow_context ctx = {
         .target_dir = real_target_dir,
         .package_dir = package_dir,
         .options = options,
-        .op = op
+        .op = op,
+        .planner = &planner
     };
 
     return dirwalk(package_dir, link_manager_callback, &ctx);
