@@ -1,6 +1,8 @@
 #ifndef __CSTOW_PLANNER_H
 #define __CSTOW_PLANNER_H
 
+#include <stddef.h>
+
 enum cstow_action_type{
     CSTOW_ACTION_CREATE,
     CSTOW_ACTION_REMOVE
@@ -14,13 +16,13 @@ struct cstow_action{
 };
 
 struct cstow_planner{
-    int count;
-    int capacity;
+    size_t count;
+    size_t capacity;
     
     struct cstow_action *actions;
 };
 
-void cstow_planner_init(struct cstow_planner *planner);
+int cstow_planner_init(struct cstow_planner *planner);
 int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type, const char *src, const char *dest);
 void cstow_plan_destroy(struct cstow_planner *planner);
 
