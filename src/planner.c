@@ -10,7 +10,7 @@ void cstow_planner_init(struct cstow_planner *planner){
     if(planner == NULL) return;
 
     planner->count = 0;
-    planner->capacity = 1;
+    planner->capacity = 0;
     planner->actions = NULL;
 }
 
@@ -18,7 +18,12 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
     if(planner == NULL || src == NULL || dest == NULL) return -1;
 
     if(planner->count == planner->capacity){
-        size_t temp_cap = planner->capacity * 2;
+        size_t temp_cap;
+        if(planner->capacity == 0){ 
+            temp_cap = 1;
+        } else {
+            temp_cap = planner->capacity * 2;
+        }
 
         struct cstow_action *temp_actions = realloc(planner->actions, temp_cap * sizeof(struct cstow_action));
         if(temp_actions == NULL){
@@ -28,15 +33,6 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
 
         planner->capacity = temp_cap;
         planner->actions = temp_actions;
-    }
-
-    if(planner->actions == NULL){
-        planner->actions = malloc(planner->capacity * sizeof(struct cstow_action));
-
-        if(planner->actions == NULL){
-            perror("malloc");
-            return -1;
-        }
     }
 
     struct cstow_action *action = &planner->actions[planner->count];
