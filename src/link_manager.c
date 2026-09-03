@@ -10,10 +10,11 @@
 #include "fs.h"
 #include "link_manager.h"
 
-static int cstow_process_path(const char* source, const char* destination, const struct stat *st_source, int verbose){
+static int cstow_process_path(const char* source, const char* destination, const struct stat *st_source, struct cstow_context *ctx){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
+    int verbose = ctx->options.verbose;
 
     if (lstat(destination, &st_dest) == -1) {
         if (errno != ENOENT) {
@@ -63,10 +64,11 @@ static int cstow_process_path(const char* source, const char* destination, const
     return PROCESS_ERROR;
 }
 
-static int uncstow_process_path(const char* source, const char* destination, const struct stat *st_source, int verbose){
+static int uncstow_process_path(const char* source, const char* destination, const struct stat *st_source, struct cstow_context *ctx){
     if(source == NULL || destination == NULL) return PROCESS_ERROR;
 
     struct stat st_dest;
+    int verbose = ctx->options.verbose;
 
     if(lstat(destination, &st_dest) == -1){
         if (errno == ENOENT) return PROCESS_SUCCESS;
@@ -124,7 +126,7 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
     }
 
     if(ctx->op == CSTOW_OP){
-        int process_status = cstow_process_path(filepath, destination, st, ctx->options.verbose);
+        int process_status = cstow_process_path(filepath, destination, st, ctx);
         switch (process_status) {
             case PROCESS_ERROR:  return -1;
             case PROCESS_SKIPCHD: return DIR_SKIPCHD;
