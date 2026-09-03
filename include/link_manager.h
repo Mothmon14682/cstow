@@ -9,9 +9,7 @@ enum cstow_operation{
 };
 
 struct cstow_context {
-    const char *stow_dir;
     const char *target_dir;
-    const char *package;
     const char *package_dir;
 
     struct cstow_cli_options options;
