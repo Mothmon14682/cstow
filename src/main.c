@@ -13,6 +13,7 @@ struct option long_options[] = {
     {"target-dir", required_argument, NULL, 'd'},
     {"uncstow",    no_argument,       NULL, 'D'},
     {"verbose",    no_argument,       NULL, 'v'},
+    {"dry-run",    no_argument,       NULL, 'n'},
     {0, 0, 0, 0}
 };
 char *stow_dir = NULL, *target_dir = NULL;
@@ -30,7 +31,8 @@ void print_help(){
            "  -s, --stow-dir\n\tSpecify the source directory which contain all the packages\n"
            "  -d, --target-dir\n\tSpecify the destination directory which the linking will happen at\n"
            "  -D, --uncstow\n\tRemove the link created in the target directory\n"
-           "  -v, --verbose\n\tShow more output for the operation\n");
+           "  -v, --verbose\n\tShow more output for the operation\n"
+           "  -n, --dry-run\n\tDo not perform any action on filesystem. Only output the actions that will be done\n");
 }
 
 int main(int argc, char *argv[]){
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]){
 
     target_dir = user->pw_dir;
 
-    while((opt = getopt_long(argc, argv, ":hs:d:Dv", long_options, NULL)) != -1){
+    while((opt = getopt_long(argc, argv, ":hs:d:Dvn", long_options, NULL)) != -1){
         switch(opt){
             case 'h':
                 print_help();
@@ -69,6 +71,9 @@ int main(int argc, char *argv[]){
             break;
             case 'v':
                 options.verbose = 1;
+            break;
+            case 'n':
+                options.dry_run = 1;
             break;
             case '?':
                 fprintf(stderr, "Aye bro you might need to use -h or --help\n");

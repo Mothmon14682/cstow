@@ -85,6 +85,25 @@ int cstow_planner_execute(struct cstow_planner *planner){
     return 0;
 }
 
+void cstow_planner_dry_run(struct cstow_planner *planner){
+    if(planner == NULL) return;
+
+    for(size_t i = 0; i < planner->count; i++){
+        const struct cstow_action *action = &planner->actions[i];
+
+        switch (action->type) {
+            case CSTOW_ACTION_CREATE:
+                printf("Created a link: %s -> %s\n", action->dest, action->src);
+            break;
+            case CSTOW_ACTION_REMOVE:
+                printf("Unlinked: %s\n", action->dest);
+            break;
+        }
+    }
+
+    return;
+}
+
 void cstow_planner_destroy(struct cstow_planner *planner){
     if(planner == NULL) return;
 

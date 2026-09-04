@@ -170,6 +170,12 @@ int link_manager_action(const char* stowdir, const char* target_dir, const char*
         return result;
     }
 
+    if(options.dry_run){
+        cstow_planner_dry_run(&planner);
+        cstow_planner_destroy(&planner);
+        return 0;
+    }
+
     if (cstow_planner_execute(&planner) != 0) {
         cstow_planner_destroy(&planner);
         return -1;
