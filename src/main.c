@@ -90,9 +90,11 @@ int main(int argc, char *argv[]){
         char *package = argv[i];
        
         if(link_manager_action(stow_dir, target_dir, package, options, op) == -1){
-            fprintf(stderr, "Failed to stow package: %s\n", package);
+            fprintf(stderr, "Failed to cstow package: %s\n", package);
 
             return 1;
+        }else {
+            fprintf(stdout, "Successfully cstow package: %s\n", package);
         }
     }
 
