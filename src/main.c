@@ -86,11 +86,15 @@ int main(int argc, char *argv[]){
         }
     }
 
-    if (argc - optind != 1) {
-        fprintf(stderr, "Expected exactly one positional argument\n");
-        return 1;
+    for(int i = optind; i < argc; i++){
+        char *package = argv[i];
+       
+        if(link_manager_action(stow_dir, target_dir, package, options, op) == -1){
+            fprintf(stderr, "Failed to stow package: %s\n", package);
+
+            return 1;
+        }
     }
 
-    char *package = argv[optind];
-    return link_manager_action(stow_dir, target_dir, package, options, op);
+    return 0;
 }
