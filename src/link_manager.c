@@ -133,7 +133,25 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
     return 0;
 }
 
+static int is_valid_package_name(const char *name){
+    if(name == NULL) return 0;
+
+    if(strncmp(name, "..", 2) == 0) return 0;
+
+    for(size_t i = 0; i < strlen(name); i++){
+        if(name[i] == '/' || name[i] == '\\') return 0;
+    }
+
+    return 0;
+}
+
 int link_manager_action(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options, enum cstow_operation op){
+    if(!is_valid_package_name(package)){
+        fprintf(stderr, "Invalid package name: %s\n", package);
+
+        return -1;
+    }
+
     char real_stowdir[PATH_MAX];
     char real_target_dir[PATH_MAX];
 
