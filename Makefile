@@ -4,8 +4,8 @@ BUILD_DIR ?= build
 
 CC = cc
 CPPFLAGS = $(addprefix -I,$(INCLUDE_DIR))
-CFLAGS = -Wall -Wextra -fsanitize=address 
-LDFLAGS = -fsanitize=address
+CFLAGS = -Wall -Wextra -fsanitize=address,undefined 
+LDFLAGS = -fsanitize=address,undefined
 DEPFLAGS = -MMD -MP -MF $(@:.o=.d)
 ARGS ?=
 
