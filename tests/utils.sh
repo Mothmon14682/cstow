@@ -61,9 +61,10 @@ assert_same_content(){
     local file1="$1"
     local file2="$2"
 
-    if [[ "$(cat $file1)" = "$(cat $file2)" ]]; then
+    if cmp -s "$file1" "$file2"; then
         echo "[PASS]: $file1 and $file2 have same the content"
     else
         echo "[FAILED]: $file1 and $file2 not have the same content"
+        exit 1
     fi
 }
