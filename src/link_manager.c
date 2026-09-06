@@ -142,7 +142,7 @@ static int is_valid_package_name(const char *name){
         if(name[i] == '/' || name[i] == '\\') return 0;
     }
 
-    return 0;
+    return 1;
 }
 
 int link_manager_action(const char* stowdir, const char* target_dir, const char* package, struct cstow_cli_options options, enum cstow_operation op){
