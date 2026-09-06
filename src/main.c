@@ -90,11 +90,13 @@ int main(int argc, char *argv[]){
         char *package = argv[i];
        
         if(link_manager_action(stow_dir, target_dir, package, options, op) == -1){
-            fprintf(stderr, "Failed to cstow package: %s\n", package);
+            if(op == CSTOW_OP) fprintf(stderr, "Failed to cstow package: %s\n", package);
+            if(op == UNCSTOW_OP) fprintf(stderr, "Failed to uncstow package: %s\n", package);
 
             return 1;
         }else {
-            fprintf(stdout, "Successfully cstow package: %s\n", package);
+            if(op == CSTOW_OP) fprintf(stdout, "Successfully cstow package: %s\n", package);
+            else if(op == UNCSTOW_OP) fprintf(stdout, "Successfully uncstow package: %s\n", package);
         }
     }
 
