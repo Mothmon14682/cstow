@@ -28,8 +28,8 @@ void print_help(){
     printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
            "A simple to use symlink farm manager\n"
            "\nOPTIONS:\n"
-           "  -s, --stow-dir\n\tSpecify the source directory which contain all the packages\n"
-           "  -d, --target-dir\n\tSpecify the destination directory which the linking will happen at\n"
+           "  -s, --stow-dir\n\tSpecify the source directory which contain all the packages\n\tWill default to the current working directory if not provided\n"
+           "  -d, --target-dir\n\tSpecify the destination directory which the linking will happen at\n\tWill default to the $HOME directory if not provived\n"
            "  -D, --uncstow\n\tRemove the link created in the target directory\n"
            "  -v, --verbose\n\tShow more output for the operation\n"
            "  -n, --dry-run\n\tDo not perform any action on filesystem. Only output the actions that will be done\n");
