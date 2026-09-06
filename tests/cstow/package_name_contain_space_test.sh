@@ -13,4 +13,4 @@ assert_is_link "$ROOT/target/init.lua"
 
 assert_same_content "$ROOT/target/init.lua" "$ROOT/package/'nvim test'/init.lua"
 
-echo "===> [PASS]: cstow/space_name_test.sh"
+echo "===> [PASS]: cstow/package_name_contain_space_test.sh"
