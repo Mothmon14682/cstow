@@ -11,11 +11,6 @@ enum {
     PROCESS_SKIPCHD = 1
 };
 
-struct cstow_cli_options{
-    int verbose;
-    int dry_run;
-};
-
 int dirwalk(const char *dirpath, int (*fn)(const char *filepath, const struct stat *st, void*), void *ctx);
 int is_our_link(const char *source, const char *destination);
 void remove_trailing_slash(char *path);

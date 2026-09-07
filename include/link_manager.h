@@ -1,13 +1,8 @@
 #ifndef __CSTOW_LINK_MANAGER_H
 #define __CSTOW_LINK_MANAGER_H
 
-#include "fs.h"
 #include "planner.h"
-
-enum cstow_operation{
-    CSTOW_OP,
-    UNCSTOW_OP
-};
+#include "cstow_types.h"
 
 struct cstow_context {
     const char *target_dir;
