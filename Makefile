@@ -35,6 +35,9 @@ clean:
 run: $(TARGET)
 	@./$(TARGET) $(ARGS)
 
+test: $(TARGET)
+	@./tests/all_test.sh
+
 -include $(OBJ:.o=.d)
 
-.PHONY: all clean run
+.PHONY: all clean run test
