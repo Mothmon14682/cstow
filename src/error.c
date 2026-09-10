@@ -3,7 +3,7 @@
 
 #include "error.h"
 
-inline void cstow_error_set(struct cstow_error *error,
+void cstow_error_set(struct cstow_error *error,
                             enum cstow_error_code code, int sys_errno, 
                             const char *operation, 
                             const char *src, const char *dest){
