@@ -4,9 +4,11 @@
 #include <string.h>
 #include <getopt.h>
 #include <pwd.h>
+#include <errno.h>
 
 #include "cli.h"
 #include "cstow_types.h"
+#include "error.h"
 #include "fs.h"
 
 static void print_help(){
@@ -23,7 +25,7 @@ static void print_help(){
 static int cstow_cli_default(struct cstow_cli_options *options){
     char cwd[PATH_MAX];
     if(getcwd(cwd, sizeof(cwd)) == NULL){
-        perror("getcwd");
+        cstow_error_set(&options->error, CSTOW_ERR_INTERNAL, errno, "cli default", NULL, NULL);
         return -1;
     }
 
@@ -32,7 +34,7 @@ static int cstow_cli_default(struct cstow_cli_options *options){
 
     struct passwd *user = getpwuid(getuid());
     if(user == NULL){
-        perror("getpwuid");
+        cstow_error_set(&options->error, CSTOW_ERR_INTERNAL, errno, "cli default", NULL, NULL);
         return -1;
     }
 
@@ -81,10 +83,12 @@ int cstow_cli_flags_handle(int argc, char *argv[], struct cstow_cli_options *opt
                 options->dry_run = 1;
             break;
             case '?':
-                return '?';
+                cstow_error_set(&options->error, CSTOW_ERR_INVALID_OPT, 0, "options handle", NULL, NULL);
+                return -1;
             break;
             case ':':
-                return ':';
+                cstow_error_set(&options->error, CSTOW_ERR_MISSING_VAL, 0, "options handle", NULL, NULL);
+                return -1;
             break;
         }
     }

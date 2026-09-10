@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <limits.h>
 #include <pwd.h>
 #include <getopt.h>
@@ -11,7 +12,15 @@
 int main(int argc, char *argv[]){
     struct cstow_cli_options options;
 
-    if(cstow_cli_flags_handle(argc, argv, &options) != 0) return 1;
+    if(cstow_cli_flags_handle(argc, argv, &options) != 0){
+        printf("error: cli: %s", options.error.operation);
+        if(options.error.sys_errno != 0) printf("%s", strerror(options.error.sys_errno));
+        if(strlen(options.error.src) != 0) printf("\nsource: %s", options.error.src);
+        if(strlen(options.error.dest) != 0) printf("\ndestination: %s", options.error.dest);
+        printf("\n");
+
+        return -1;
+    }
 
     for(int i = optind; i < argc; i++){
         char *package = argv[i];
