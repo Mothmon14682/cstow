@@ -23,4 +23,6 @@ void cstow_error_set(struct cstow_error *error,
                             const char *operation, 
                             const char *src, const char *dest);
 
+void cstow_error_print(const char *facility, struct cstow_error err);
+
 #endif
