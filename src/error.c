@@ -4,6 +4,16 @@
 
 #include "error.h"
 
+static char *cstow_error_str(enum cstow_error_code code, int errno){
+    switch (code) {
+        case CSTOW_ERR_MISSING_VAL: return "An option is missing value";
+        case CSTOW_ERR_INVALID_OPT: return "The provided option is not supported";
+        case CSTOW_ERR_INTERNAL: return strerror(errno);
+    }
+
+    return "INVALID";
+}
+
 void cstow_error_set(struct cstow_error *error,
                             enum cstow_error_code code, int sys_errno, 
                             const char *operation, 
@@ -22,8 +32,11 @@ void cstow_error_set(struct cstow_error *error,
 }
 
 void cstow_error_print(const char *facility, struct cstow_error error){
-    fprintf(stderr, "\x1B[41m\x1B[1m ERROR \x1B[0m\x1B[47m\x1B[30m\x1B[1m %s: %s \x1B[0m", facility, error.operation);
-    if(error.sys_errno != 0) printf("\x1B[31m %s \x1B[0m", strerror(error.sys_errno));
+    fprintf(stderr, "\x1B[41m\x1B[1m ERROR \x1B[0m\x1B[47m\x1B[30m\x1B[1m %s: %s \x1B[0m \x1B[31m %s \x1B[0m", 
+            facility, 
+            error.operation, 
+            cstow_error_str(error.code, error.sys_errno));
+
     if(strlen(error.src) != 0) printf("\nsource: %s", error.src);
     if(strlen(error.dest) != 0) printf("\ndestination: %s", error.dest);
     printf("\n");
