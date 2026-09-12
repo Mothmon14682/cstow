@@ -99,7 +99,7 @@ int cstow_cli_flags_handle(int argc, char *argv[], struct cstow_cli_options *opt
 
 
 int cstow_cli_package_handle(int argc, char *argv[], int optind, struct cstow_cli_options *options){
-    if(optind - argc <= 0) {
+    if(argc - optind <= 0) {
         cstow_error_set(&cstow_error, CSTOW_ERR_MISSING_PACK, 0, "cli", "options handle", NULL, NULL);
         return -1;
     }
