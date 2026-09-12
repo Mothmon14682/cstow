@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -5,6 +6,7 @@
 #include <unistd.h>
 
 #include "planner.h"
+#include "error.h"
 
 void cstow_planner_init(struct cstow_planner *planner){
     if(planner == NULL) return;
@@ -27,7 +29,7 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
 
         struct cstow_action *temp_actions = realloc(planner->actions, temp_cap * sizeof(struct cstow_action));
         if(temp_actions == NULL){
-            perror("realloc");
+            cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "planner", "adding an action", NULL, NULL);
             return -1;
         }
 
@@ -48,6 +50,7 @@ int cstow_planner_add(struct cstow_planner *planner, enum cstow_action_type type
         action->src = NULL;
         action->dest = NULL;
 
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "planner", "adding an action", NULL, NULL);
         return -1;
     }
 
@@ -65,7 +68,7 @@ int cstow_planner_execute(struct cstow_planner *planner){
         switch (action->type) {
             case CSTOW_ACTION_CREATE:
                 if(symlink(action->src, action->dest) == -1){
-                    perror("symlink");
+                    cstow_error_set(&cstow_error, CSTOW_ERR_FAILED_LINK, 0, "planner", "execute linking", action->src, action->dest);
                     return -1;
                 }
 
@@ -73,7 +76,7 @@ int cstow_planner_execute(struct cstow_planner *planner){
             break;
             case CSTOW_ACTION_REMOVE:
                 if (unlink(action->dest) == -1) {
-                    perror("unlink");
+                    cstow_error_set(&cstow_error, CSTOW_ERR_FAILED_UNLINK, 0, "planner", "execute unlinking", action->src, action->dest);
                     return -1;
                 }
 
