@@ -16,13 +16,14 @@ static char *cstow_error_str(enum cstow_error_code code, int errno){
 }
 
 void cstow_error_set(struct cstow_error *error,
-                            enum cstow_error_code code, int sys_errno, 
+                            enum cstow_error_code code, int sys_errno, const char *facility,
                             const char *operation, 
                             const char *src, const char *dest){
     
 
     error->code = code;
     error->sys_errno = sys_errno;
+    strncpy(error->facility, facility, 256);
     strncpy(error->operation, operation, 256);
 
     if(src != NULL) strncpy(error->src, src, PATH_MAX);

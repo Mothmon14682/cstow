@@ -13,6 +13,7 @@ enum cstow_error_code {
 struct cstow_error {
     enum cstow_error_code code;
     int sys_errno;
+    char facility[256];
     char operation[256];
 
     char src[PATH_MAX];
@@ -20,7 +21,7 @@ struct cstow_error {
 };
 
 void cstow_error_set(struct cstow_error *error,
-                            enum cstow_error_code code, int sys_errno, 
+                            enum cstow_error_code code, int sys_errno, const char *facility, 
                             const char *operation, 
                             const char *src, const char *dest);
 
