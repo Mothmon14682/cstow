@@ -8,6 +8,7 @@ static char *cstow_error_str(enum cstow_error_code code, int errno){
     switch (code) {
         case CSTOW_ERR_MISSING_VAL: return "An option is missing value";
         case CSTOW_ERR_INVALID_OPT: return "The provided option is not supported";
+        case CSTOW_ERR_MISSING_PACK: return "No package was provided";
         case CSTOW_ERR_INTERNAL: return strerror(errno);
     }
 

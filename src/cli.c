@@ -10,6 +10,7 @@
 #include "cstow_types.h"
 #include "error.h"
 #include "fs.h"
+#include "link_manager.h"
 
 static void print_help(){
     printf("Usage: cstow [OPTIONS] ... [PACKAGE] ...\n"
@@ -90,6 +91,30 @@ int cstow_cli_flags_handle(int argc, char *argv[], struct cstow_cli_options *opt
                 cstow_error_set(&options->error, CSTOW_ERR_MISSING_VAL, 0, "options handle", NULL, NULL);
                 return -1;
             break;
+        }
+    }
+
+    return 0;
+}
+
+
+int cstow_cli_package_handle(int argc, char *argv[], int optind, struct cstow_cli_options *options){
+    if(optind - argc <= 0) {
+        cstow_error_set(&options->error, CSTOW_ERR_MISSING_PACK, 0, "options handle", NULL, NULL);
+        return -1;
+    }
+
+    for(int i = optind; i < argc; i++){
+        char *package = argv[i];
+       
+        if(link_manager_action(options->stow_dir, options->target_dir, package, *options, options->op) == -1){
+            if(options->op == CSTOW_OP) fprintf(stderr, "Failed to cstow package: %s\n", package);
+            if(options->op == UNCSTOW_OP) fprintf(stderr, "Failed to uncstow package: %s\n", package);
+
+            return -1;
+        }else {
+            if(options->op == CSTOW_OP) fprintf(stdout, "Successfully cstow package: %s\n", package);
+            if(options->op == UNCSTOW_OP) fprintf(stdout, "Successfully uncstow package: %s\n", package);
         }
     }
 

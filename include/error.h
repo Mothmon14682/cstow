@@ -6,6 +6,7 @@
 enum cstow_error_code {
     CSTOW_ERR_MISSING_VAL,
     CSTOW_ERR_INVALID_OPT,
+    CSTOW_ERR_MISSING_PACK,
     CSTOW_ERR_INTERNAL
 };
 
