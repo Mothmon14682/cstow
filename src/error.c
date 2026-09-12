@@ -33,9 +33,9 @@ void cstow_error_set(struct cstow_error *error,
     else error->dest[0] = '\0';
 }
 
-void cstow_error_print(const char *facility, struct cstow_error error){
+void cstow_error_print(struct cstow_error error){
     fprintf(stderr, "\x1B[41m\x1B[1m ERROR \x1B[0m\x1B[47m\x1B[30m\x1B[1m %s: %s \x1B[0m \x1B[31m %s \x1B[0m", 
-            facility, 
+            error.facility, 
             error.operation, 
             cstow_error_str(error.code, error.sys_errno));
 
