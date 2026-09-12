@@ -10,7 +10,7 @@ enum cstow_error_code {
     CSTOW_ERR_INTERNAL
 };
 
-struct cstow_error {
+struct cstow_error_t {
     enum cstow_error_code code;
     int sys_errno;
     char facility[256];
@@ -20,11 +20,13 @@ struct cstow_error {
     char dest[PATH_MAX];
 };
 
-void cstow_error_set(struct cstow_error *error,
+extern struct cstow_error_t cstow_error;
+
+void cstow_error_set(struct cstow_error_t *error,
                             enum cstow_error_code code, int sys_errno, const char *facility, 
                             const char *operation, 
                             const char *src, const char *dest);
 
-void cstow_error_print(struct cstow_error err);
+void cstow_error_print(struct cstow_error_t err);
 
 #endif

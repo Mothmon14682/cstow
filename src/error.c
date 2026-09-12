@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+struct cstow_error_t cstow_error;
+
 static char *cstow_error_str(enum cstow_error_code code, int errno){
     switch (code) {
         case CSTOW_ERR_MISSING_VAL: return "An option is missing value";
@@ -15,7 +17,7 @@ static char *cstow_error_str(enum cstow_error_code code, int errno){
     return "INVALID";
 }
 
-void cstow_error_set(struct cstow_error *error,
+void cstow_error_set(struct cstow_error_t *error,
                             enum cstow_error_code code, int sys_errno, const char *facility,
                             const char *operation, 
                             const char *src, const char *dest){
@@ -33,7 +35,7 @@ void cstow_error_set(struct cstow_error *error,
     else error->dest[0] = '\0';
 }
 
-void cstow_error_print(struct cstow_error error){
+void cstow_error_print(struct cstow_error_t error){
     fprintf(stderr, "\x1B[41m\x1B[1m ERROR \x1B[0m\x1B[47m\x1B[30m\x1B[1m %s: %s \x1B[0m \x1B[31m %s \x1B[0m", 
             error.facility, 
             error.operation, 

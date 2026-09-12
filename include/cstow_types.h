@@ -3,8 +3,6 @@
 
 #include <limits.h>
 
-#include "error.h"
-
 enum cstow_operation{
     CSTOW_OP,
     UNCSTOW_OP
@@ -17,7 +15,6 @@ struct cstow_cli_options{
     char target_dir[PATH_MAX];
 
     enum cstow_operation op;
-    struct cstow_error error;
 };
 
 #endif
