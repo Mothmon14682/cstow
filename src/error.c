@@ -13,6 +13,7 @@ static char *cstow_error_str(enum cstow_error_code code, int errno){
         case CSTOW_ERR_MISSING_PACK: return "No package was provided";
         case CSTOW_ERR_FAILED_LINK: return "Failed to create a symlink";
         case CSTOW_ERR_FAILED_UNLINK: return "Failed to unlink a symlink";
+        case CSTOW_ERR_CONFLICT: return "A conflict occured. Make sure that the destination is a link from the package";
         case CSTOW_ERR_INTERNAL: return strerror(errno);
     }
 

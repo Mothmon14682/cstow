@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <libgen.h>
 
+#include "error.h"
 #include "fs.h"
 #include "planner.h"
 #include "link_manager.h"
@@ -19,7 +20,7 @@ static int cstow_process_path(const char* source, const char* destination, const
 
     if (lstat(destination, &st_dest) == -1) {
         if (errno != ENOENT) {
-            perror("lstat destination");
+            cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "link_manager", "get status for destination", NULL, NULL);
             return PROCESS_ERROR;
         }
 
@@ -53,11 +54,11 @@ static int cstow_process_path(const char* source, const char* destination, const
             return PROCESS_SUCCESS;
         }
 
-        fprintf(stderr, "conflict: %s exists but not from cstow\n", destination);
+        cstow_error_set(&cstow_error, CSTOW_ERR_CONFLICT, 0, "link_manager", "checking link in destination", source, destination);
         return PROCESS_ERROR;
     }
 
-    fprintf(stderr, "conflict: %s exists but not from cstow\n", destination);
+    cstow_error_set(&cstow_error, CSTOW_ERR_CONFLICT, 0, "link_manager", "checking link in destination", source, destination);
     return PROCESS_ERROR;
 }
 
@@ -70,13 +71,13 @@ static int uncstow_process_path(const char* source, const char* destination, con
     if(lstat(destination, &st_dest) == -1){
         if (errno == ENOENT) return PROCESS_SUCCESS;
 
-        perror("lstat destination");
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "link_manager", "get status for destination", NULL, destination);
         return PROCESS_ERROR;
     }
 
     if(S_ISLNK(st_dest.st_mode)){
         if (!is_our_link(source, destination)) {
-            fprintf(stderr, "conflict: %s is not a link to %s\n", destination, source);
+            cstow_error_set(&cstow_error, CSTOW_ERR_CONFLICT, 0, "link_manager", "checking link in destination", source, destination);
             return PROCESS_ERROR;
         }
 
@@ -97,7 +98,7 @@ static int uncstow_process_path(const char* source, const char* destination, con
         return PROCESS_SUCCESS;
     }
 
-    fprintf(stderr, "conflict: %s\n", destination);
+    cstow_error_set(&cstow_error, CSTOW_ERR_CONFLICT, 0, "link_manager", "checking link in destination", source, destination);
     return PROCESS_ERROR;
 }
 
@@ -113,7 +114,7 @@ static int link_manager_callback(const char* filepath, const struct stat *st, vo
 
     int needed = snprintf(destination, sizeof(destination), "%s/%s", ctx->target_dir, relative);
     if(needed < 0 || needed >= PATH_MAX){
-        fprintf(stderr, "Path name too long\n");
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "link_manager_callback", "copy string from variable to struct", NULL, NULL);
         return -1;
     }
 
@@ -156,19 +157,22 @@ int link_manager_action(const char* stowdir, const char* target_dir, const char*
     char real_target_dir[PATH_MAX];
 
     if(realpath(stowdir, real_stowdir) == NULL){
-        perror("realpath");
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "link_manager_action", "get realpath", NULL, NULL);
         return -1;
     }
 
     if(realpath(target_dir, real_target_dir) == NULL){
-        perror("realpath");
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "link_manager_action", "get realpath", NULL, NULL);
         return -1;
     }
 
     char package_dir[PATH_MAX];
 
     int needed = snprintf(package_dir, sizeof(package_dir), "%s/%s", real_stowdir, package);
-    if(needed < 0 || needed >= PATH_MAX) return -1;
+    if(needed < 0 || needed >= PATH_MAX) {
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, ENAMETOOLONG, "link_manager_action", "join path", NULL, NULL);
+        return -1;
+    }
 
     struct cstow_planner planner;
     cstow_planner_init(&planner);
