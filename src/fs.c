@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,13 +9,14 @@
 #include <sys/stat.h>
 
 #include "fs.h"
+#include "error.h"
 
 int dirwalk(const char *dirpath, 
             int (*fn)(const char *filepath, const struct stat *st, void*), void *arg){
     DIR *dir = opendir(dirpath);
 
     if(dir == NULL){
-        perror("opendir");
+        cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "dirwalk", "open path to traverse", NULL, NULL);
         return -1;
     }
 
@@ -25,14 +27,14 @@ int dirwalk(const char *dirpath,
 
         int needed = snprintf(child_path, sizeof(child_path), "%s/%s", dirpath, entry->d_name);
         if(needed < 0 || needed >= PATH_MAX){
-            fprintf(stderr, "Path name too long\n");
+            cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "dirwalk", "join path", NULL, NULL);
             closedir(dir);
             return -1;
         }
 
         struct stat st;
         if(lstat(child_path, &st) == -1){
-            perror("lstat");
+            cstow_error_set(&cstow_error, CSTOW_ERR_INTERNAL, errno, "dirwalk", "get stat of the path", NULL, NULL);
             closedir(dir);
             return -1;
         }
