@@ -44,7 +44,7 @@ void cstow_error_print(struct cstow_error_t error){
             error.operation, 
             cstow_error_str(error.code, error.sys_errno));
 
-    if(strlen(error.src) != 0) printf("\nsource: %s", error.src);
-    if(strlen(error.dest) != 0) printf("\ndestination: %s", error.dest);
-    printf("\n");
+    if(strlen(error.src) != 0) fprintf(stderr, "\nsource: %s", error.src);
+    if(strlen(error.dest) != 0) fprintf(stderr, "\ndestination: %s", error.dest);
+    fprintf(stderr, "\n");
 }
